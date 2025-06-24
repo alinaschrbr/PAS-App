@@ -13,8 +13,8 @@ import pandas as pd
 from datetime import datetime
 
 # --- Excel-Dateien einlesen ---
-df_auftraege = pd.read_excel("auftraege.xlsx")
-df_aufwand = pd.read_excel("arbeitsaufwand.xlsx")
+df_auftraege = pd.read_excel("auftraege.xlsx", engine="openpyxl")
+df_aufwand = pd.read_excel("arbeitsaufwand.xlsx", engine="openpyxl")
 
 # --- Verknüpfen über die Sachnummer ---
 df = pd.merge(df_auftraege, df_aufwand, on="Sachnummer", how="left")
