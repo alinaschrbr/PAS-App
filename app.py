@@ -39,9 +39,6 @@ if auftrag_file and aufwand_file:
 else:
     st.info("⬆️ Bitte lade beide Dateien hoch, um fortzufahren.")
 
-# Vorschau
-print(df)
-
 pipeline = {
     "Platz 1": 35,  # Minuten bereits eingeplant
     "Platz 2": 40,
