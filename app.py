@@ -8,21 +8,34 @@ Original file is located at
 
 # PAS
 """
-
+import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# --- Excel-Dateien einlesen ---
-df_auftraege = pd.read_excel("auftraege.xlsx", engine="openpyxl")
-df_aufwand = pd.read_excel("arbeitsaufwand.xlsx", engine="openpyxl")
+st.title("📦 Intelligente Auftragsverteilung")
 
-# --- Verknüpfen über die Sachnummer ---
-df = pd.merge(df_auftraege, df_aufwand, on="Sachnummer", how="left")
+# Datei-Uploads
+auftrag_file = st.file_uploader("Lade die Auftragsliste hoch (.xlsx)", type=["xlsx"])
+aufwand_file = st.file_uploader("Lade die Aufwandsliste hoch (.xlsx)", type=["xlsx"])
 
-# --- Dringlichkeit berechnen (in Tagen) ---
-heute = pd.to_datetime(datetime.today().date())
-df["F2_Datum"] = pd.to_datetime(df["F2_Datum"])
-df["Dringlichkeit_Tage"] = (df["F2_Datum"] - heute).dt.days
+if auftrag_file is not None and aufwand_file is not None:
+    # Excel-Dateien einlesen
+    df_auftraege = pd.read_excel(auftrag_file, engine="openpyxl")
+    df_aufwand = pd.read_excel(aufwand_file, engine="openpyxl")
+
+    # Zusammenführen
+    df = pd.merge(df_auftraege, df_aufwand, on="Sachnummer", how="left")
+
+    # Dringlichkeit berechnen
+    heute = pd.to_datetime(datetime.today().date())
+    df["F2_Datum"] = pd.to_datetime(df["F2_Datum"])
+    df["Dringlichkeit_Tage"] = (df["F2_Datum"] - heute).dt.days
+
+    # Zeige die Tabelle an
+    st.subheader("🧾 Übersicht der kombinierten Auftragsdaten")
+    st.dataframe(df)
+else:
+    st.info("⬆️ Bitte lade beide Dateien hoch, um fortzufahren.")
 
 # Vorschau
 print(df)
