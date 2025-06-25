@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from io import BytesIO
 
 st.set_page_config(page_title="Auftragsverteilung", layout="wide")
 st.title("🤖 Intelligente Auftragsverteilung")
@@ -14,53 +15,61 @@ if not (auftrag_file and aufwand_file and pipeline_file):
     st.info("⬆️ Bitte lade alle drei Dateien hoch, um fortzufahren.")
 
 if auftrag_file and aufwand_file and pipeline_file:
-    # Excel-Dateien einlesen
+    # Einlesen
     df_auftraege = pd.read_excel(auftrag_file, engine="openpyxl")
     df_aufwand = pd.read_excel(aufwand_file, engine="openpyxl")
     df_pipeline = pd.read_excel(pipeline_file, engine="openpyxl")
 
-    # Aufräumen: Spaltennamen glätten (optional, verhindert Fehler durch Leerzeichen etc.)
+    # Aufräumen
     df_auftraege.columns = df_auftraege.columns.str.strip()
     df_aufwand.columns = df_aufwand.columns.str.strip()
     df_pipeline.columns = df_pipeline.columns.str.strip()
 
-    # Merge von Aufträgen mit Aufwand
+    # Merge + Dringlichkeit
     df = pd.merge(df_auftraege, df_aufwand, on="Sachnummer", how="left")
-
-    # Dringlichkeit berechnen
     df["F2_Datum"] = pd.to_datetime(df["F2_Datum"])
     heute = pd.to_datetime(datetime.today().date())
     df["Dringlichkeit_Tage"] = (df["F2_Datum"] - heute).dt.days
-
-    # Nach Dringlichkeit sortieren
     df = df.sort_values(by="Dringlichkeit_Tage")
 
-    # Dictionary für aktuelle Pipeline
+    # Pipeline vorbereiten
     pipeline = dict(zip(df_pipeline["Arbeitsplatz"], df_pipeline["Aktuelle_Minuten"]))
-
-    # Neue Spalte zur Zuweisung vorbereiten
     zuweisungen = []
 
-    # Verteilung der Aufträge
+    # Verteilung
     for _, auftrag in df.iterrows():
-        # Finde den Arbeitsplatz mit der geringsten Last
-        arbeitsplatz = min(pipeline, key=pipeline.get)
-        
-        # Zuweisung speichern
+        moegliche_plaetze = pipeline.items()
+        arbeitsplatz = min(moegliche_plaetze, key=lambda x: x[1])[0]
         zuweisungen.append(arbeitsplatz)
-        
-        # Minutenlast erhöhen
-        aufwand = auftrag["Aufwand_Min"]
-        pipeline[arbeitsplatz] += aufwand
+        pipeline[arbeitsplatz] += auftrag["Aufwand_Min"]
 
-    # Spalte hinzufügen
     df["Zugewiesen_an"] = zuweisungen
+    df_neu = pd.DataFrame(list(pipeline.items()), columns=["Arbeitsplatz", "Neue_Gesamtlast_Minuten"])
 
-    # Ergebnis anzeigen
+    # Tabelle anzeigen
     st.subheader("📊 Verteilte Aufträge")
     st.dataframe(df, use_container_width=True)
 
-    # Aktuelle Pipeline nach Verteilung anzeigen
     st.subheader("🛠️ Neue Pipeline nach Zuweisung")
-    df_neu = pd.DataFrame(list(pipeline.items()), columns=["Arbeitsplatz", "Neue_Gesamtlast_Minuten"])
     st.dataframe(df_neu, use_container_width=True)
+
+    # 📈 Visualisierung
+    st.subheader("📊 Visualisierung: Auslastung der Arbeitsplätze")
+    chart_data = df_neu.set_index("Arbeitsplatz")
+    st.bar_chart(chart_data)
+
+    # 🧾 Excel Export
+    st.subheader("📤 Export als Excel-Datei")
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, sheet_name="Zuweisungen", index=False)
+        df_neu.to_excel(writer, sheet_name="Pipeline", index=False)
+    output.seek(0)
+
+    st.download_button(
+        label="⬇️ Ergebnis herunterladen",
+        data=output,
+        file_name="verteilte_auftraege.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
