@@ -21,6 +21,8 @@ if auftrag_file and aufwand_file:
 
     # Zusammenführen beider Tabellen über Sachnummer
     df = pd.merge(df_auftraege, df_aufwand, on="Sachnummer", how="left")
+    
+    st.write("🔍 Spaltenübersicht:", df.columns.tolist())
 
     # F2-Datum in datetime konvertieren und Dringlichkeit berechnen
     df["F2_Datum"] = pd.to_datetime(df["F2_Datum"])
@@ -32,7 +34,7 @@ if auftrag_file and aufwand_file:
     for _, auftrag in df.iterrows():
         st.markdown(
             f"- **Sachnummer:** {auftrag['Sachnummer']}, "
-            f"**Aufwand:** {auftrag['Aufwand_Minuten']} min, "
+            f"**Aufwand:** {auftrag['Aufwand_Min']} min, "
             f"**F2:** {auftrag['F2_Datum'].date()}, "
             f"**Dringlichkeit:** {auftrag['Dringlichkeit_Tage']} Tage"
         )
