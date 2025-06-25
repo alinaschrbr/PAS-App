@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-st.title("📦 Intelligente Auftragsverteilung")
+st.title("Neue Version: 📦 Intelligente Auftragsverteilung")
 
 # Datei-Uploads
 auftrag_file = st.file_uploader("Lade die Auftragsliste hoch (.xlsx)", type=["xlsx"])
