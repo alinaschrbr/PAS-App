@@ -36,9 +36,6 @@ if auftrag_file and aufwand_file:
     st.subheader("📊 Auftragsübersicht")
     st.dataframe(df)
 
-else:
-    st.info("⬆️ Bitte lade beide Dateien hoch, um fortzufahren.")
-
 pipeline = {
     "Platz 1": 35,  # Minuten bereits eingeplant
     "Platz 2": 40,
@@ -51,11 +48,11 @@ gewicht_pipeline = 1.5
 
 zuweisungen = []
 
-for _, auftrag in df.iterrows():
+    for _, auftrag in df.iterrows():
     min_wert = float("inf")
     bester_platz = None
 
-    for platz, last in pipeline.items():
+        for platz, last in pipeline.items():
         wert = (
             auftrag["Dringlichkeit_Tage"] * gewicht_dringlichkeit +
             auftrag["Aufwand_Min"] * gewicht_aufwand +
@@ -76,7 +73,8 @@ for _, auftrag in df.iterrows():
         "F2_Datum": auftrag["F2_Datum"],
         "Dringlichkeit": auftrag["Dringlichkeit_Tage"]
     })
-
+else:
+    st.info("⬆️ Bitte lade beide Dateien hoch, um fortzufahren.")
 # Ergebnis als DataFrame anzeigen
 df_zuweisung = pd.DataFrame(zuweisungen)
 print(df_zuweisung)
