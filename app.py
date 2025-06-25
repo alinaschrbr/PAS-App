@@ -32,6 +32,9 @@ if auftrag_file and aufwand_file:
         # → Hier könntest du später Arbeitsplatz-Zuweisung reinpacken
         # st.write(f"{sachnummer}: {aufwand} Minuten – {dringlichkeit} Tage bis F2")
 
+else:
+    st.info("⬆️ Bitte lade beide Dateien hoch, um fortzufahren.")    
+    
     # Ergebnis anzeigen
     st.subheader("📊 Auftragsübersicht")
     st.dataframe(df)
@@ -73,8 +76,7 @@ zuweisungen = []
         "F2_Datum": auftrag["F2_Datum"],
         "Dringlichkeit": auftrag["Dringlichkeit_Tage"]
     })
-else:
-    st.info("⬆️ Bitte lade beide Dateien hoch, um fortzufahren.")
+
 # Ergebnis als DataFrame anzeigen
 df_zuweisung = pd.DataFrame(zuweisungen)
 print(df_zuweisung)
