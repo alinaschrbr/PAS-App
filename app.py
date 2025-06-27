@@ -1,15 +1,30 @@
-import streamlit as st
 import pandas as pd
-from datetime import datetime
-from io import BytesIO
+import streamlit as st
+import os
 
-st.set_page_config(page_title="Auftragsverteilung", layout="wide")
-st.title("🤖 Intelligente Auftragsverteilung")
+# Lokaler OneDrive-Pfad
+ORDNER_PFAD = r"C:\Users\Alina.Schreiber\OneDrive - DP World\Desktop\PAS-App"
 
-# Datei-Uploads
-auftrag_file = st.file_uploader("📥 Auftragsliste hochladen (.xlsx)", type=["xlsx"])
-aufwand_file = st.file_uploader("📥 Aufwandsliste hochladen (.xlsx)", type=["xlsx"])
-pipeline_file = st.file_uploader("📥 Pipeline je Arbeitsplatz (.xlsx)", type=["xlsx"])
+# Lade die Dateien direkt
+datei_auftraege = os.path.join(ORDNER_PFAD, "auftraege.xlsx")
+datei_aufwand = os.path.join(ORDNER_PFAD, "arbeitsaufwand.xlsx")
+datei_pipeline = os.path.join(ORDNER_PFAD, "pipeline.xlsx")
+
+# Lese die Excel-Dateien
+df_auftraege = pd.read_excel(datei_auftraege)
+df_aufwand = pd.read_excel(datei_aufwand)
+df_pipeline = pd.read_excel(datei_pipeline)
+
+# Optional: Zeige die Dateien in der App an
+st.header("📦 Vorschau: Eingelesene Dateien")
+st.subheader("Aufträge")
+st.dataframe(df_auftraege)
+
+st.subheader("Arbeitsaufwand")
+st.dataframe(df_aufwand)
+
+st.subheader("Pipeline")
+st.dataframe(df_pipeline)
 
 if not (auftrag_file and aufwand_file and pipeline_file):
     st.info("⬆️ Bitte lade alle drei Dateien hoch, um fortzufahren.")
